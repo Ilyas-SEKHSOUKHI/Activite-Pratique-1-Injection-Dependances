@@ -1,38 +1,47 @@
 # Activité Pratique N°1 : Inversion de Contrôle (IoC) et Injection des Dépendances (DI)
 
-Ce projet illustre les concepts fondamentaux du génie logiciel : le **couplage faible**, le principe d'**inversion des dépendances (DIP - SOLID)** et l'**injection de dépendances (DI)** en Java.
+Ce projet illustre la mise en œuvre des concepts fondamentaux d'architecture logicielle en Java : le **couplage faible**, le principe d'**inversion des dépendances (DIP)** et l'**injection des dépendances (DI)**.
 
 ---
 
 ## 🎯 Objectifs de l'activité
 
-1. **Créer l'interface `IDao`** avec une méthode `getData()`.
-2. **Créer une implémentation de cette interface** (`daoImpl`, `daoImplV2`).
-3. **Créer l'interface `IMetier`** avec une méthode `calcul()`.
-4. **Créer une implémentation de cette interface en utilisant le couplage faible** (`metierImpl`).
+1. **Créer l'interface `idao`** comportant la méthode `double getData()`.
+2. **Créer les implémentations de cette interface** :
+   - `daoImpl` (simulation d'une source Base de données).
+   - `daoImplV2` (simulation d'une source Web Service).
+3. **Créer l'interface `imetier`** comportant la méthode `double calcul()`.
+4. **Créer l'implémentation `metierImpl` en couplage faible** :
+   - Dépendance vers l'interface `idao` (et non vers une classe concrète).
+   - Prise en charge de l'injection par **constructeur** et par **setter**.
+5. **Tester l'injection statique dans la classe `pres`**.
 
 ---
 
 ## 📂 Structure du Projet
 
 ```text
-src/main/java/
-├── dao/
-│   ├── idao.java         # Interface définissant le contrat d'accès aux données
-│   ├── daoImpl.java      # Première implémentation (ex: version Base de Données)
-│   └── daoImplV2.java    # Deuxième implémentation (ex: version Web/Capteur)
-├── metier/
-│   ├── imetier.java      # Interface définissant le contrat des traitements métier
-│   └── metierImpl.java   # Implémentation du métier en couplage faible avec idao
-└── pres/
-    └── pres.java         # Classe de présentation / démarrage de l'application
+Activite-Pratique-1-Injection-Dependances/
+├── pom.xml
+└── src/
+    └── main/
+        └── java/
+            ├── dao/
+            │   ├── idao.java         # Interface du contrat d'accès aux données
+            │   ├── daoImpl.java      # Implémentation V1 (Base de données)
+            │   └── daoImplV2.java    # Implémentation V2 (Web service)
+            ├── metier/
+            │   ├── imetier.java      # Interface du contrat métier
+            │   └── metierImpl.java   # Implémentation métier (couplage faible)
+            └── pres/
+                └── pres.java         # Classe de test / présentation (instanciation et injection)
 ```
 
 ---
 
-## 🏗️ Architecture & Diagramme de Classes
+## 🏗️ Diagramme de Classes & Architecture
 
-Le schéma ci-dessous illustre le principe du **couplage faible** : la classe `metierImpl` dépend uniquement de l'interface `idao` et non pas d'une implémentation concrète (`daoImpl` ou `daoImplV2`).
+Le schéma ci-dessous met en évidence le **couplage faible** : la classe `metierImpl` est liée exclusivement à l'interface `idao`. Elle ignore totalement quelle implémentation concrète (`daoImpl` ou `daoImplV2`) sera utilisée à l'exécution.
 
 ```mermaid
 classDiagram
@@ -58,24 +67,32 @@ classDiagram
 
     class metierImpl {
         -dao: idao
+        +metierImpl()
         +metierImpl(dao: idao)
         +setDao(dao: idao) void
         +calcul() double
+    }
+
+    class pres {
+        +main(args: String[]) void
     }
 
     idao <|.. daoImpl : implements
     idao <|.. daoImplV2 : implements
     imetier <|.. metierImpl : implements
     metierImpl o--> idao : utilise (Couplage faible)
+    pres ..> metierImpl : instancie & injecte
+    pres ..> daoImpl : instancie
 ```
 
 ---
 
-## 📝 Détail des Étapes Réalisées
+## 💻 Description et Code Source
 
-### 1. Interface `IDao` (`idao.java`)
-L'interface définit le contrat d'accès aux données sans imposer la manière dont elles sont récupérées (base de données, service web, fichier, etc.).
+### 1. Couche DAO (Accès aux Données)
 
+#### Interface `idao.java`
+Définit le contrat d'accès aux données :
 ```java
 package dao;
 
@@ -84,42 +101,41 @@ public interface idao {
 }
 ```
 
----
+#### Implémentation V1 : `daoImpl.java` (Base de Données)
+```java
+package dao;
 
-### 2. Implémentations de `IDao` (`daoImpl.java` & `daoImplV2.java`)
-Ces classes fournissent des implémentations concrètes de l'interface `idao`.
+public class daoImpl implements idao {
+    // Par exemple version DataBase
+    @Override
+    public double getData() {
+        System.out.println("Version de base de donnees");
+        return 10;
+    }
+}
+```
 
-- **`daoImpl`** (simulation d'une source type Base de Données) :
-  ```java
-  package dao;
+#### Implémentation V2 : `daoImplV2.java` (Web Service)
+Permet de simuler une évolution ou une autre source de données sans toucher au code de la couche métier :
+```java
+package dao;
 
-  public class daoImpl implements idao {
-      @Override
-      public double getData() {
-          return 10;
-      }
-  }
-  ```
-
-- **`daoImplV2`** (simulation d'une autre source, ex. capteur ou API) :
-  ```java
-  package dao;
-
-  public class daoImplV2 implements idao {
-      @Override
-      public double getData() {
-          return 20;
-      }
-  }
-  ```
-
-Grâce à l'abstraction `idao`, l'application peut basculer d'une implémentation à une autre sans modifier une seule ligne du code métier.
+public class daoImplV2 implements idao {
+    // Par exemple version WebUI / Web Service
+    @Override
+    public double getData() {
+        System.out.println("Version de web service");
+        return 20;
+    }
+}
+```
 
 ---
 
-### 3. Interface `IMetier` (`imetier.java`)
-L'interface métier expose les règles et traitements fonctionnels de l'application.
+### 2. Couche Métier
 
+#### Interface `imetier.java`
+Définit le contrat des opérations métier :
 ```java
 package metier;
 
@@ -128,25 +144,30 @@ public interface imetier {
 }
 ```
 
----
-
-### 4. Implémentation Métier avec Couplage Faible (`metierImpl.java`)
-La classe `metierImpl` implémente `imetier` et applique le **couplage faible** en déclarant une référence vers l'interface `idao` :
+#### Implémentation `metierImpl.java` (Couplage Faible)
+Cette classe dépend uniquement de l'interface `idao`. Elle propose deux mécanismes pour injecter cette dépendance :
+- Un constructeur par défaut et un mutateur `setDao(...)` (**Injection par Setter**).
+- Un constructeur avec paramètre `metierImpl(idao dao)` (**Injection par Constructeur**).
 
 ```java
 package metier;
 import dao.idao;
 
 public class metierImpl implements imetier {
-    // Couplage faible : référence vers l'interface et NON une classe concrète
+    // Couplage faible : référence vers l'interface
     private idao dao;
 
-    // Injection via le constructeur
+    // Constructeur par défaut
+    public metierImpl(){
+        this.dao = null;
+    }
+
+    // Constructeur avec paramètres
     public metierImpl(idao dao){
         this.dao = dao;
     }
 
-    // Injection via le setter
+    // Mutateur pour l'injection par Setter
     public void setDao(idao dao){
         this.dao = dao;
     }
@@ -160,63 +181,67 @@ public class metierImpl implements imetier {
 }
 ```
 
-#### Points clés du Couplage Faible :
-- **Attribut privé de type interface** : `private idao dao;` évite tout lien direct avec une classe concrète (`new daoImpl()`).
-- **Injection par constructeur & setter** : Permet à un composant externe (ou framework IoC) d'injecter l'implémentation souhaitée au moment de l'exécution.
-- **Testabilité** : Il devient très simple de créer un mock de `idao` pour tester unitairement `metierImpl`.
-
 ---
 
-## ⚙️ Modes d'Injection des Dépendances
+### 3. Couche Présentation : `pres.java`
 
-Dans la couche de présentation (`pres.java`), l'injection de dépendances peut se faire de plusieurs manières :
+La classe `pres` initialise les composants et réalise l'**injection de dépendances statique** :
 
-### A. Injection Statique (Par instanciation directe)
-Instanciation manuelle et injection via constructeur ou setter :
 ```java
-idao dao = new daoImpl(); // ou new daoImplV2()
-metierImpl metier = new metierImpl(dao);
-System.out.println("Résultat = " + metier.calcul());
+package pres;
+import dao.daoImpl;
+import metier.metierImpl;
+
+public class pres {
+    public void main(String args[]){
+        System.out.println(" ******** Activite-Pratique-1-Injection-Dependances ******** ");
+        daoImpl a = new daoImpl();
+
+        // Option 1 : Injection via constructeur avec paramètre
+        // metierImpl b = new metierImpl(a);
+
+        // Option 2 : Injection via Setter
+        metierImpl b = new metierImpl();
+        b.setDao(a);
+
+        System.out.println(b.calcul());
+    }
+}
 ```
 
-### B. Injection Dynamique (Par réflexion)
-Permet de rendre l'application totalement fermée à la modification et ouverte à l'extension (Open/Closed Principle) à l'aide d'un fichier de configuration (`config.txt`) :
-```java
-Scanner scanner = new Scanner(new File("config.txt"));
-String daoClassName = scanner.nextLine();
-Class<?> cDao = Class.forName(daoClassName);
-idao dao = (idao) cDao.getDeclaredConstructor().newInstance();
-
-String metierClassName = scanner.nextLine();
-Class<?> cMetier = Class.forName(metierClassName);
-imetier metier = (imetier) cMetier.getDeclaredConstructor(idao.class).newInstance(dao);
-
-System.out.println("Résultat = " + metier.calcul());
+#### Résultat d'exécution en console :
+```text
+ ******** Activite-Pratique-1-Injection-Dependances ******** 
+Version de base de donnees
+15.0
 ```
 
-### C. Injection avec le Framework Spring
-- **Via XML** : utilisation de balises `<bean>` et `<property>` / `<constructor-arg>`.
-- **Via Annotations** : utilisation de `@Component`, `@Repository`, `@Service` et `@Autowired`.
+> **Remarque :** Si l'on remplace `daoImpl a = new daoImpl();` par `daoImplV2 a = new daoImplV2();`, la méthode `calcul()` retourne `25.0` (`20 + 5`), tout en affichant `"Version de web service"`, démontrant ainsi la flexibilité du couplage faible.
 
 ---
 
-## 🚀 Prérequis et Compilation
+## 🔄 Comparaison des Approches d'Injection
 
-- **JDK** : Version 17+ (ou version configurée dans le `pom.xml`)
-- **Maven** : 3.8+
-
-### Compilation :
-```bash
-mvn clean compile
-```
-
----
-
-## 🏆 Bénéfices de cette Conception
-
-| Critère | Couplage Fort | Couplage Faible (Ce projet) |
+| Approche | Description | Avantages |
 |---|---|---|
-| **Interchangeabilité** | Difficile, nécessite de modifier le code | Immédiate, par configuration ou injection |
-| **Tests Unitaires** | Complexes, dépendances réelles requises | Faciles, utilisation de mocks |
-| **Maintenabilité** | Faible (effet domino lors des changements) | Élevée, composants modulaires et indépendants |
-| **Respect SOLID** | Viole le DIP (Dependency Inversion) | Respecte les principes DIP et OCP |
+| **Injection par Constructeur** (`new metierImpl(dao)`) | L'objet est instancié avec toutes ses dépendances dès sa création. | L'objet est toujours dans un état cohérent et prêt à l'emploi. |
+| **Injection par Setter** (`b.setDao(dao)`) | L'objet est instancié vide puis la dépendance est injectée via la méthode `setDao`. | Permet de changer dynamiquement de dépendance au cours du cycle de vie de l'objet. |
+| **Injection Dynamique** (par Réflexion / Fichier de configuration) | Chargement des classes avec `Class.forName()` et instanciation dynamique. | L'application est totalement fermée à la modification et ouverte à l'extension (Principe OCP). |
+| **Injection avec Framework (Spring)** | Gestion automatique du cycle de vie et des dépendances par le conteneur IoC (XML ou Annotations `@Autowired`). | Suppression complète du code "boilerplate" d'instanciation. |
+
+---
+
+## 🛠️ Compilation et Exécution
+
+### Prérequis
+- Java JDK 17+ (ou compatible)
+- Apache Maven
+
+### Commandes Maven
+```bash
+# Compilation du projet
+mvn clean compile
+
+# Exécution des tests ou packaging
+mvn package
+```
