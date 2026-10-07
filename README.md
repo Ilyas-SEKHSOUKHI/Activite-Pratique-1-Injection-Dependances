@@ -14,7 +14,7 @@ Ce projet illustre la mise en œuvre des concepts fondamentaux d'architecture lo
 4. **Créer l'implémentation `metierImpl` en couplage faible** :
    - Dépendance vers l'interface `idao` (et non vers une classe concrète).
    - Prise en charge de l'injection par **constructeur** et par **setter**.
-5. **Tester l'injection statique dans la classe `pres`**.
+5. **Tester l'injection statique dans la classe `pres1`**.
 6. **Documenter les résultats avec captures d'écran de l'exécution**.
 
 ---
@@ -189,7 +189,7 @@ public class metierImpl implements imetier {
 
 ### 3. Couche Présentation - Package `ma.ilyas.pres`
 
-La classe `pres` initialise les composants et réalise l'**injection de dépendances statique** :
+La classe `pres1` initialise les composants et réalise l'**injection de dépendances statique** :
 
 ```java
 package ma.ilyas.pres;
@@ -219,7 +219,7 @@ public class pres {
 
 ### Résultat de l'injection statique par Setter
 
-Lors de l'exécution de la classe `pres` avec l'implémentation `daoImpl` injectée dans `metierImpl` :
+Lors de l'exécution de la classe `pres1` avec l'implémentation `daoImpl` injectée dans `metierImpl` :
 1. `daoImpl.getData()` affiche `"Version de base de donnees"` et retourne `10`.
 2. `metierImpl.calcul()` calcule `10 + 5 = 15.0`.
 
