@@ -1,5 +1,8 @@
 # Activité Pratique N°1 : Inversion de Contrôle (IoC) et Injection des Dépendances (DI)
 
+> **Réalisé par :** **Ilyas SEKHSOUKHI**  
+> **Module :** Architecture JEE et Java avancé (2ACI)
+
 Ce projet illustre la mise en œuvre des concepts fondamentaux d'architecture logicielle en Java : le **couplage faible**, le principe d'**inversion des dépendances (DIP)** et l'**injection des dépendances (DI)** sous ses deux formes : **statique** (instanciation directe) et **dynamique** (API Réflexion et fichier de configuration).
 
 ---
@@ -355,3 +358,10 @@ mvn clean compile
 # Packager le projet (générer le JAR)
 mvn clean package
 ```
+
+---
+
+## 👤 Auteur
+
+- **Créé et réalisé par :** **Ilyas SEKHSOUKHI**
+- **Formation :** 2ACI – Architecture JEE et Java avancé
