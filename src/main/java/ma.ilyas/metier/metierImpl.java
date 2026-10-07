@@ -1,5 +1,5 @@
-package metier;
-import dao.idao;
+package ma.ilyas.metier;
+import ma.ilyas.dao.idao;
 
 public class metierImpl implements imetier {
     private idao dao;

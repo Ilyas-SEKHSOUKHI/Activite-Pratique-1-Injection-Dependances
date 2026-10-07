@@ -1,6 +1,6 @@
-package pres;
-import dao.daoImpl;
-import metier.metierImpl;
+package ma.ilyas.pres;
+import ma.ilyas.dao.daoImpl;
+import ma.ilyas.metier.metierImpl;
 
 public class pres {
     public void main(String args[]){

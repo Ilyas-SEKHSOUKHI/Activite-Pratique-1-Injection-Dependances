@@ -1,4 +1,4 @@
-package dao;
+package ma.ilyas.dao;
 
 public class daoImplV2 implements idao{
     //Par exemple version WebUI

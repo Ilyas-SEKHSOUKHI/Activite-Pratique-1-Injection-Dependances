@@ -1,4 +1,4 @@
-package dao;
+package ma.ilyas.dao;
 
 public class daoImpl implements idao {
     //Par exemple version DataBase
