@@ -3,9 +3,7 @@ import ma.ilyas.dao.idao;
 
 public class metierImpl implements imetier {
     private idao dao;
-    public metierImpl(){ // constructeur par default
-        this.dao = null;
-    }
+    public metierImpl(){}
     public metierImpl(idao dao){ // constructeur paranetrer
         this.dao = dao;
     }
