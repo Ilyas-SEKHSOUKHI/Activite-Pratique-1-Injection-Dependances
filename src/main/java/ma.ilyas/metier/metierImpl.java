@@ -3,8 +3,9 @@ import ma.ilyas.dao.idao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component("metier")
+@Service("metier")
 public class metierImpl implements imetier {
     @Autowired
     @Qualifier("d2")

@@ -1,7 +1,8 @@
 package ma.ilyas.dao;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component("d")
+@Repository("d")
 public class daoImpl implements idao {
     //Par exemple version DataBase
     @Override
