@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 public class pres2 {
     // FileNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(new File("config.txt"));
         String daoClassName = scanner.nextLine();
         Class cDao = Class.forName(daoClassName);

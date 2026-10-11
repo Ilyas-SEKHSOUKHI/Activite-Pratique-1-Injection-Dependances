@@ -4,7 +4,7 @@ import ma.ilyas.ext.daoImplV2;
 import ma.ilyas.metier.metierImpl;
 
 public class pres1 {
-    public static void main(String args[]){
+    public static void main(String[] args){
         System.out.println(" ******** Activite-Pratique-1-Injection-Dependances ******** ");
         daoImplV2 a = new daoImplV2();
 
