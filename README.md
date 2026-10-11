@@ -18,7 +18,7 @@
    - [3. Approche 1 : Injection Statique (`pres1`)](#3-approche-1--injection-statique-pres1)
    - [4. Approche 2 : Injection Dynamique par Réflexion & `config.txt` (`pres2`)](#4-approche-2--injection-dynamique-par-r%C3%A9flexion--configtxt-pres2)
    - [5. Approche 3 : Injection Spring via Fichier XML (`presSpringXML`)](#5-approche-3--injection-spring-via-fichier-xml-presspringxml)
-   - [6. Approche 4 : Injection Spring via Annotations (`PresSpringAnnotation`)](#6-approche-4--injection-spring-via-annotations-presspringannotation)
+   - [6. Approche 4 : Injection Spring via Annotations Stéréotypes (`PresSpringAnnotation`)](#6-approche-4--injection-spring-via-annotations-st%C3%A9r%C3%A9otypes-presspringannotation)
 6. [Captures d'écran & Validation](#-captures-d%C3%A9cran--validation)
 7. [Tableau Comparatif des Approches](#-tableau-comparatif-des-approches)
 8. [Guide de Compilation & Exécution](#-%EF%B8%8F-guide-de-compilation--ex%C3%A9cution)
@@ -28,23 +28,23 @@
 
 ## 🌟 Introduction & Contexte
 
-Dans la conception d'applications modulaires et évolutives, le principe de **responsabilité unique (SRP)** et le principe d'**inversion des dépendances (DIP)** (lettre *D* de SOLID) stipulent qu'un module de haut niveau ne doit pas dépendre directement de modules de bas niveau, mais plutôt d'**abstractions (interfaces)**.
+Dans la conception d'applications modulaires et maintenables, le principe de **responsabilité unique (SRP)** et le principe d'**inversion des dépendances (DIP)** (lettre *D* des principes SOLID) stipulent qu'un module de haut niveau ne doit pas dépendre directement de modules de bas niveau, mais plutôt d'**abstractions (interfaces)**.
 
-L'**Inversion de Contrôle (IoC - Inversion of Control)** transfère la responsabilité d'instanciation et d'assemblage des objets à une entité externe (code principal, fabrique ou conteneur IoC comme Spring).
+L'**Inversion de Contrôle (IoC - Inversion of Control)** transfère la responsabilité d'instanciation et d'assemblage des objets à une entité externe (classe de présentation, fabrique ou conteneur IoC comme Spring).
 
 Ce projet explore et compare concrètement les **4 piliers de l'injection des dépendances** en Java :
 1. **L'injection statique** (par instanciation directe avec l'opérateur `new`).
 2. **L'injection dynamique manuelle** (via l'API Réflexion de Java et un fichier de configuration texte externe `config.txt`).
 3. **L'injection dynamique via conteneur Spring IoC configuré par XML** (`config.xml`).
-4. **L'injection dynamique via conteneur Spring IoC configuré par Annotations** (`@Component`, `@Autowired`, `@Qualifier`).
+4. **L'injection dynamique via conteneur Spring IoC configuré par Annotations stéréotypes** (`@Repository`, `@Service`, `@Autowired`, `@Qualifier`).
 
 ---
 
 ## 🎯 Objectifs de l'activité
 
 1. **Conception d'interfaces modulaires** :
-   - `idao` : déclare la méthode `double getData()`.
-   - `imetier` : déclare la méthode `double calcul()`.
+   - `idao` : déclare le contrat d'accès aux données (`double getData()`).
+   - `imetier` : déclare le contrat de la logique métier (`double calcul()`).
 2. **Implémentations interchangeables du DAO** :
    - `daoImpl` : simule un accès à une base de données (retourne `10.0`).
    - `daoImplV2` : simule une consommation de service web (retourne `20.0`).
@@ -55,7 +55,11 @@ Ce projet explore et compare concrètement les **4 piliers de l'injection des d�
    - Injection statique directe.
    - Injection dynamique pure Java (Réflexion : `Class.forName()`, `newInstance()`, `Method.invoke()`).
    - Injection déclarative avec Spring Framework (XML et Annotations).
-5. **Respect du principe Open/Closed (OCP)** :
+5. **Utilisation des annotations stéréotypes Spring** :
+   - `@Repository` pour les composants de la couche d'accès aux données (DAO).
+   - `@Service` pour les composants de la couche métier.
+   - `@Autowired` et `@Qualifier` pour l'injection ciblée.
+6. **Respect du principe Open/Closed (OCP)** :
    - Permettre l'extension du système (ex. basculer de `daoImpl` vers `daoImplV2`) sans modifier ni recompiler les classes métier existantes.
 
 ---
@@ -127,7 +131,7 @@ classDiagram
     pres2 ..> metierImpl : Invocation setDao()
 
     presSpringXML ..> imetier : Récupération du bean (config.xml)
-    PresSpringAnnotation ..> imetier : Scan des composants (@Autowired / @Qualifier)
+    PresSpringAnnotation ..> imetier : Scan des composants (@Service / @Repository / @Autowired / @Qualifier)
 ```
 
 ---
@@ -148,12 +152,12 @@ Activite-Pratique-1-Injection-Dependances/
         │   └── ma.ilyas/
         │       ├── dao/
         │       │   ├── idao.java                      # Interface du DAO
-        │       │   └── daoImpl.java                   # Implémentation DAO Base de Données (@Component("d"))
+        │       │   └── daoImpl.java                   # Implémentation DAO Base de Données (@Repository("d"))
         │       ├── ext/
-        │       │   └── daoImplV2.java                 # Implémentation DAO Web Service (@Component("d2"))
+        │       │   └── daoImplV2.java                 # Implémentation DAO Web Service (@Repository("d2"))
         │       ├── metier/
         │       │   ├── imetier.java                   # Interface Métier
-        │       │   └── metierImpl.java                # Implémentation Métier en couplage faible
+        │       │   └── metierImpl.java                # Implémentation Métier en couplage faible (@Service("metier"))
         │       └── pres/
         │           ├── pres1.java                     # 1. Injection statique (new)
         │           ├── pres2.java                     # 2. Injection dynamique par réflexion (config.txt)
@@ -180,14 +184,15 @@ public interface idao {
 ```
 
 #### Implémentation V1 : `daoImpl.java` (`ma.ilyas.dao`)
-Simule l'accès à une base de données relationnelle. L'annotation `@Component("d")` permet au conteneur Spring d'enregistrer ce composant sous l'identifiant `"d"`.
+Simule l'accès à une base de données relationnelle. L'annotation `@Repository("d")` (stéréotype de composant pour la couche persistance/données) permet au conteneur Spring d'enregistrer ce bean sous l'identifiant `"d"`.
 ```java
 package ma.ilyas.dao;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component("d")
+@Repository("d")
 public class daoImpl implements idao {
-    // Par exemple version DataBase
+    //Par exemple version DataBase
     @Override
     public double getData() {
         System.out.println("Version de base de donnees");
@@ -197,15 +202,16 @@ public class daoImpl implements idao {
 ```
 
 #### Implémentation V2 : `daoImplV2.java` (`ma.ilyas.ext`)
-Simule un appel à un service web distant. L'annotation `@Component("d2")` l'enregistre avec l'alias `"d2"`.
+Simule un appel à un service web distant. L'annotation `@Repository("d2")` l'enregistre avec l'identifiant `"d2"`.
 ```java
 package ma.ilyas.ext;
 import ma.ilyas.dao.idao;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component("d2")
+@Repository("d2")
 public class daoImplV2 implements idao {
-    // Par exemple version WebUI
+    //Par exemple version WebUI
     @Override
     public double getData() {
         System.out.println("Version de web service");
@@ -232,7 +238,8 @@ public interface imetier {
 Cette classe est conçue selon le principe du **couplage faible** :
 - Elle possède un attribut de type `idao` (l'interface), et **aucune dépendance directe** vers `daoImpl` ou `daoImplV2`.
 - Elle supporte l'injection par **constructeur paramétré** et par **setter**.
-- Pour Spring par annotations, elle intègre `@Autowired` et `@Qualifier("d2")` pour lever l'ambiguïté entre les deux implémentations DAO disponibles.
+- L'annotation `@Service("metier")` indique à Spring qu'il s'agit d'un composant de la couche logique métier.
+- Les annotations `@Autowired` et `@Qualifier("d2")` permettent l'injection automatique de l'implémentation V2 (`daoImplV2`) sans ambiguïté.
 
 ```java
 package ma.ilyas.metier;
@@ -240,8 +247,9 @@ import ma.ilyas.dao.idao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component("metier")
+@Service("metier")
 public class metierImpl implements imetier {
     @Autowired
     @Qualifier("d2")
@@ -316,6 +324,8 @@ package ma.ilyas.pres;
 import ma.ilyas.dao.idao;
 import ma.ilyas.metier.imetier;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Scanner;
 
@@ -396,11 +406,12 @@ public class presSpringXML {
 
 ---
 
-### 6. Approche 4 : Injection Spring via Annotations (`PresSpringAnnotation`)
+### 6. Approche 4 : Injection Spring via Annotations Stéréotypes (`PresSpringAnnotation`)
 
-Cette approche moderne élimine le besoin de fichier XML ou de configuration externe en s'appuyant sur les annotations Java standards de Spring :
-- `@Component` : marque la classe comme un bean géré par Spring.
-- `@Autowired` : demande au conteneur d'injecter automatiquement la dépendance requise.
+Cette approche moderne élimine le besoin de fichier XML en tirant profit des annotations stéréotypes de Spring :
+- `@Repository("d")` / `@Repository("d2")` : spécialisation de `@Component` pour la couche d'accès aux données (DAO / Persistance).
+- `@Service("metier")` : spécialisation de `@Component` pour la couche logique métier.
+- `@Autowired` : injection automatique de dépendance par type gérée par le conteneur Spring.
 - `@Qualifier("d2")` : spécifie explicitement quel bean injecter lorsque plusieurs implémentations de `idao` coexistent.
 
 #### Code du lanceur Spring Annotations `PresSpringAnnotation.java` :
@@ -413,7 +424,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 public class PresSpringAnnotation {
     public static void main(String[] args){
-        // Initialisation du conteneur Spring en scannant le package "ma.ilyas"
+        // Initialisation du conteneur Spring en scannant le package racine "ma.ilyas"
         ApplicationContext applicationContext = new AnnotationConfigApplicationContext("ma.ilyas");
 
         // Récupération du bean de type imetier
@@ -456,6 +467,7 @@ Exécution avec configuration via `config.txt` (`daoImpl` et `metierImpl`) :
 |---|---|---|---|---|
 | **Mécanisme d'instanciation** | Opérateur `new` explicite | `Class.forName()`, `newInstance()` | Conteneur Spring (`BeanFactory` / `ApplicationContext`) | Scan automatique (`AnnotationConfigApplicationContext`) |
 | **Mécanisme d'injection** | Appel direct du constructeur ou du setter | Réflexion (`Method.invoke("setDao", ...)`) | Balise `<property ref="..."/>` dans `config.xml` | `@Autowired` + `@Qualifier` |
+| **Annotations utilisées** | Aucune | Aucune | Aucune | `@Repository`, `@Service`, `@Autowired`, `@Qualifier` |
 | **Niveau de couplage** | Fort dans la couche présentation | Faible (aucune référence aux classes concrètes) | Faible (découplage total) | Faible (découplage total) |
 | **Respect du principe OCP** | ❌ Non (nécessite recompilation) | ✅ Oui (modification du fichier `config.txt`) | ✅ Oui (modification du fichier `config.xml`) | ✅ Oui (changement du `@Qualifier` ou profil Spring) |
 | **Gestion du cycle de vie** | Manuelle | Manuelle | Automatisée par Spring (Singleton, Prototype, etc.) | Automatisée par Spring (Singleton, Prototype, etc.) |
@@ -507,7 +519,7 @@ Le projet intègre Spring Framework 7 pour les démonstrations IoC :
 Cette activité pratique démontre concrètement l'évolution de la gestion des dépendances dans les architectures logicielles :
 1. **L'instanciation directe (`new`)** crée une rigidité qui rend les tests unitaires complexes et freine l'évolutivité.
 2. **L'injection dynamique manuelle par réflexion** résout le problème de dépendance au code source en déportant la configuration dans un fichier externe, mais impose une gestion verbeuse des exceptions et du cycle de vie des objets.
-3. **Le Framework Spring** combine le meilleur des deux mondes en industrialisant ce mécanisme grâce à son conteneur IoC : gestion transparente des cycles de vie, injection par XML ou par annotations (`@Component`, `@Autowired`), et flexibilité totale conforme aux principes d'architecture logicielle moderne.
+3. **Le Framework Spring** combine le meilleur des deux mondes en industrialisant ce mécanisme grâce à son conteneur IoC : gestion transparente des cycles de vie, injection par XML ou par annotations stéréotypes (`@Repository`, `@Service`, `@Autowired`), et flexibilité totale conforme aux principes d'architecture logicielle moderne.
 
 ---
 
