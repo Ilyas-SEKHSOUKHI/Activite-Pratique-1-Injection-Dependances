@@ -1,11 +1,13 @@
 package ma.ilyas.metier;
 import ma.ilyas.dao.idao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("metier")
 public class metierImpl implements imetier {
     @Autowired
+    @Qualifier("d2")
     private idao dao;
     public metierImpl(){}
     public metierImpl(idao dao){ // constructeur paranetrer
