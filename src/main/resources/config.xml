@@ -2,8 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-    <bean id="d" class="ext.daoImplV2" ></bean>
-    <bean id="metier" class="metier.metierImpl">
+    <bean id="d" class="ma.ilyas.ext.daoImplV2"></bean>
+    <bean id="metier" class="ma.ilyas.metier.metierImpl">
         <property name="dao" ref="d"></property>
     </bean>
 </beans>
